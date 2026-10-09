@@ -1,0 +1,742 @@
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#4f46e5" />
+<meta name="description" content="حوّل صور JPG وPNG وWEBP إلى ملف PDF واحد مجانًا، داخل متصفحك مباشرة دون رفع أي بيانات." />
+<title>Image to PDF | تحويل الصور إلى PDF مجانًا</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  html{scroll-behavior:smooth}
+  body{font-family:'Cairo',sans-serif;background:#f6f7fb;color:#0f172a;overflow-x:hidden}
+  ::selection{background:#4f46e5;color:#fff}
+  ::-webkit-scrollbar{width:10px}
+  ::-webkit-scrollbar-track{background:#eceef4}
+  ::-webkit-scrollbar-thumb{background:#c5c9dd;border-radius:8px}
+  ::-webkit-scrollbar-thumb:hover{background:#a9aecb}
+  section[id]{scroll-margin-top:92px}
+  .hide{display:none !important}
+
+  .gradient-text{background:linear-gradient(120deg,#4f46e5,#7c3aed 55%,#db2777);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+  .fade-up{animation:fadeUp .7s cubic-bezier(.22,1,.36,1) both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
+  .blob{position:absolute;border-radius:9999px;filter:blur(70px);pointer-events:none}
+
+  .btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:.55rem;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;font-family:inherit;font-weight:700;font-size:.95rem;padding:.8rem 1.9rem;border:none;border-radius:.9rem;cursor:pointer;box-shadow:0 12px 26px -10px rgba(79,70,229,.65);transition:transform .22s ease,box-shadow .22s ease,opacity .22s}
+  .btn-primary:hover:not(.is-disabled){transform:translateY(-2px);box-shadow:0 18px 32px -10px rgba(79,70,229,.7)}
+  .btn-primary:active:not(.is-disabled){transform:translateY(0)}
+  .btn-primary.is-disabled{opacity:.45;cursor:not-allowed;box-shadow:none;transform:none!important}
+  .btn-sm{padding:.55rem 1.35rem;font-size:.85rem;border-radius:.75rem}
+
+  .btn-download{display:inline-flex;align-items:center;justify-content:center;gap:.55rem;background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-family:inherit;font-weight:700;font-size:.95rem;padding:.8rem 1.7rem;border:none;border-radius:.9rem;cursor:pointer;box-shadow:0 12px 26px -10px rgba(16,185,129,.6);transition:transform .22s,box-shadow .22s}
+  .btn-download:hover{transform:translateY(-2px);box-shadow:0 18px 32px -10px rgba(16,185,129,.65)}
+
+  .btn-ghost{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;background:#fff;border:1.5px solid #e2e8f0;color:#475569;font-family:inherit;font-weight:700;font-size:.85rem;padding:.62rem 1.2rem;border-radius:.8rem;cursor:pointer;transition:all .22s}
+  .btn-ghost:hover{border-color:#f43f5e;color:#e11d48;background:#fff1f2}
+
+  .btn-wa{display:inline-flex;align-items:center;justify-content:center;gap:.6rem;background:#25D366;color:#fff;font-family:inherit;font-weight:800;font-size:1.05rem;padding:.95rem 2.3rem;border-radius:9999px;text-decoration:none;box-shadow:0 14px 30px -10px rgba(37,211,102,.65);transition:transform .22s,box-shadow .22s,background .22s}
+  .btn-wa:hover{transform:translateY(-2px) scale(1.02);background:#1fb857;box-shadow:0 20px 38px -10px rgba(37,211,102,.75)}
+
+  .chip{display:inline-block;background:#eef2ff;color:#4f46e5;font-size:.72rem;font-weight:800;padding:.3rem .85rem;border-radius:9999px;letter-spacing:.03em}
+  .chip-count{display:inline-flex;align-items:center;gap:.45rem;background:#eef2ff;color:#4338ca;font-size:.82rem;font-weight:800;padding:.55rem 1.1rem;border-radius:9999px}
+
+  .dropzone{border:2.5px dashed #cbd5e1;border-radius:1.4rem;background:linear-gradient(180deg,#ffffff,#f8faff);transition:border-color .25s,background .25s,transform .25s,box-shadow .25s;cursor:pointer}
+  .dropzone:hover{border-color:#818cf8;background:#f5f7ff}
+  .dropzone:focus-visible{outline:3px solid #c7d2fe;outline-offset:3px}
+  .dropzone.dragover{border-color:#4f46e5;background:#eef2ff;transform:scale(1.012);box-shadow:0 0 0 6px rgba(79,70,229,.08)}
+  .dropzone .dz-icon{transition:transform .3s ease}
+  .dropzone.dragover .dz-icon{transform:translateY(-7px) scale(1.1)}
+  .dropzone.shake{animation:shake .45s ease}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+
+  .thumb.dragging{opacity:.35}
+  .thumb.drag-target{border-color:#4f46e5 !important;box-shadow:0 0 0 4px rgba(79,70,229,.22)}
+  .move-btn{width:1.6rem;height:1.6rem;border:none;border-radius:.45rem;background:#f1f5f9;color:#64748b;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s}
+  .move-btn:hover{background:#e0e7ff;color:#4f46e5}
+
+  .toast{animation:toastIn .35s cubic-bezier(.22,1,.36,1)}
+  @keyframes toastIn{from{opacity:0;transform:translateY(-14px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+  .spinner{width:54px;height:54px;border-radius:50%;border:5px solid rgba(79,70,229,.18);border-top-color:#4f46e5;animation:spin .9s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .step-num{width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;font-weight:900;font-size:1.35rem;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 24px -8px rgba(79,70,229,.5)}
+
+  .wa-float{position:fixed;bottom:22px;left:22px;z-index:45;width:56px;height:56px;border-radius:50%;background:#25D366;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 28px -8px rgba(37,211,102,.7);transition:transform .25s}
+  .wa-float:hover{transform:scale(1.1)}
+  .wa-float::after{content:'';position:absolute;inset:0;border-radius:50%;border:2px solid #25D366;animation:waPing 2s ease-out infinite}
+  @keyframes waPing{0%{transform:scale(1);opacity:.8}100%{transform:scale(1.65);opacity:0}}
+</style>
+</head>
+<body>
+
+<!-- ===== الهيدر ===== -->
+<header class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-slate-200/70">
+  <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+    <a href="#top" class="flex items-center gap-3 shrink-0">
+      <span class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/35">
+        <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </span>
+      <span class="leading-tight">
+        <span class="block font-black text-slate-800 text-lg">Image to PDF</span>
+        <span class="block text-[11px] text-slate-500 font-semibold">تحويل الصور إلى PDF</span>
+      </span>
+    </a>
+    <nav class="hidden md:flex items-center gap-7 text-sm font-bold text-slate-500">
+      <a href="#features" class="hover:text-indigo-600 transition">المميزات</a>
+      <a href="#how" class="hover:text-indigo-600 transition">كيف يعمل</a>
+      <a href="#contact" class="hover:text-indigo-600 transition">تواصل مع المطوّر</a>
+    </nav>
+    <a href="#converter" class="btn-primary btn-sm">ابدأ الآن</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- =====قسم البطل ===== -->
+  <section class="relative overflow-hidden pt-14 pb-10">
+    <span class="blob w-72 h-72 bg-indigo-300/45 -top-20 -right-20"></span>
+    <span class="blob w-80 h-80 bg-fuchsia-300/40 -bottom-12 -left-24"></span>
+    <span class="blob w-56 h-56 bg-sky-300/40 top-32 left-1/3"></span>
+    <div class="relative max-w-4xl mx-auto px-4 text-center">
+      <span class="fade-up inline-flex items-center gap-2 bg-white/85 border border-indigo-100 text-indigo-700 text-xs md:text-sm font-extrabold px-4 py-2 rounded-full shadow-sm">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        مجاني 100% • لا يتم رفع أي صورة • خصوصية تامة
+      </span>
+      <h1 class="fade-up mt-5 text-4xl md:text-6xl font-black text-slate-900 leading-tight" style="animation-delay:.08s">
+        حوّل صورك إلى <span class="gradient-text">ملف PDF</span> واحد
+      </h1>
+      <p class="fade-up mt-4 text-base md:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto font-semibold" style="animation-delay:.16s">
+        ارفع أي عدد من الصور بصيغ JPG أو PNG أو WEBP، رتّبها كما تشاء، ثم اضغط
+        <span class="font-black text-indigo-600">«تحويل إلى PDF»</span>
+        لتحميل ملف PDF حقيقي فورًا — كل ذلك داخل متصفحك.
+      </p>
+    </div>
+  </section>
+
+  <!-- =====أداة التحويل ===== -->
+  <section id="converter" class="max-w-4xl mx-auto px-4 pb-8">
+    <div class="fade-up bg-white rounded-3xl shadow-2xl shadow-slate-200/70 border border-slate-100 p-5 md:p-9" style="animation-delay:.22s">
+
+      <!-- منطقة السحب والإفلات -->
+      <div id="dropzone" class="dropzone p-8 md:p-14 text-center" tabindex="0" role="button" aria-label="منطقة رفع الصور: اسحب الصور وأفلتها هنا أو انقر للاختيار من الجهاز">
+        <input type="file" id="fileInput" class="hide" multiple accept="image/jpeg,image/jpg,image/png,image/webp,.jpg,.jpeg,.png,.webp" />
+        <span class="dz-icon w-20 h-20 mx-auto rounded-3xl bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center">
+          <svg class="w-10 h-10 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+        </span>
+        <h2 class="mt-5 text-xl md:text-2xl font-black text-slate-800">اسحب الصور وأفلتها هنا</h2>
+        <p class="mt-1.5 text-sm md:text-base text-slate-500 font-semibold">أو انقر في أي مكان داخل هذا المربع لاختيار الصور من جهازك</p>
+        <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
+          <span class="chip">JPG</span><span class="chip">JPEG</span><span class="chip">PNG</span><span class="chip">WEBP</span>
+        </div>
+        <p class="mt-3 text-xs text-slate-400 font-semibold">يمكنك اختيار أي عدد من الصور • لا يتم رفع أي بيانات إلى أي خادم</p>
+      </div>
+
+      <!-- شريط الأدوات -->
+      <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="chip-count">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span id="countText">عدد الصور: 0</span>
+          </span>
+          <button type="button" id="clearBtn" class="btn-ghost hide">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            مسح الكل
+          </button>
+        </div>
+        <button type="button" id="convertBtn" class="btn-primary is-disabled" aria-disabled="true">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          تحويل إلى PDF
+        </button>
+      </div>
+
+      <!--معاينة الصور -->
+      <div id="previewWrap" class="mt-7 hide">
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <h3 class="text-base md:text-lg font-black text-slate-800">الصور المختارة</h3>
+          <span class="text-xs text-slate-400 font-semibold hidden sm:block">اسحب الصورة لتغيير ترتيبها، أو استخدم الأسهم</span>
+        </div>
+        <div id="previewGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4"></div>
+      </div>
+
+      <!--نتيجة التحويل -->
+      <div id="resultPanel" class="mt-7 hide rounded-2xl border border-emerald-200 bg-emerald-50 p-5 md:p-6">
+        <div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-right">
+          <span class="w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/40 mx-auto sm:mx-0">
+            <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          <div class="flex-1">
+            <h3 class="text-lg font-black text-emerald-800">تم إنشاء ملف PDF بنجاح!</h3>
+            <p class="text-sm text-emerald-700 font-bold mt-0.5">حجم الملف: <span id="pdfSize"></span> • عدد الصفحات: <span id="pdfPages"></span></p>
+          </div>
+          <div class="flex flex-col gap-2 w-full sm:w-auto">
+            <button type="button" id="downloadBtn" class="btn-download">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              تحميل ملف PDF
+            </button>
+            <button type="button" id="newConvBtn" class="btn-ghost">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              البدء من جديد
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== المميزات ===== -->
+  <section id="features" class="py-16">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="text-center mb-10">
+        <span class="text-indigo-600 font-extrabold text-sm">مميزات الموقع</span>
+        <h2 class="mt-2 text-3xl md:text-4xl font-black text-slate-900">لماذا تستخدم Image to PDF؟</h2>
+        <p class="mt-3 text-slate-500 font-semibold">أداة سريعة، آمنة، ومجانية بالكامل لتحويل صورك إلى PDF</p>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-lg shadow-slate-200/50 hover:-translate-y-1.5 hover:shadow-xl transition">
+          <span class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </span>
+          <h3 class="mt-4 font-black text-slate-800 text-lg">خصوصية تامة</h3>
+          <p class="mt-1.5 text-sm text-slate-500 leading-relaxed font-semibold">التحويل يتم بالكامل داخل متصفحك — صورك لا تغادر جهازك أبدًا.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-lg shadow-slate-200/50 hover:-translate-y-1.5 hover:shadow-xl transition">
+          <span class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+          </span>
+          <h3 class="mt-4 font-black text-slate-800 text-lg">جودة أصلية</h3>
+          <p class="mt-1.5 text-sm text-slate-500 leading-relaxed font-semibold">نحافظ على جودة صورك كما هي بدون ضغط أو تشويه، وكل صورة على صفحة مستقلة.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-lg shadow-slate-200/50 hover:-translate-y-1.5 hover:shadow-xl transition">
+          <span class="w-12 h-12 rounded-2xl bg-gradient-to-br from-fuchsia-500 to-pink-600 flex items-center justify-center shadow-lg shadow-fuchsia-500/30">
+            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+          </span>
+          <h3 class="mt-4 font-black text-slate-800 text-lg">مجاني بلا حدود</h3>
+          <p class="mt-1.5 text-sm text-slate-500 leading-relaxed font-semibold">حوّل أي عدد من الصور مجانًا، بدون تسجيل حساب أو أي قيود.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-lg shadow-slate-200/50 hover:-translate-y-1.5 hover:shadow-xl transition">
+          <span class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-500/30">
+            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          </span>
+          <h3 class="mt-4 font-black text-slate-800 text-lg">صيغ متعددة</h3>
+          <p class="mt-1.5 text-sm text-slate-500 leading-relaxed font-semibold">يدعم JPG وJPEG وPNG وWEBP، مع الحفاظ على أبعاد كل صورة كما هي.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== كيف يعمل ===== -->
+  <section id="how" class="py-16 bg-white/60 border-y border-slate-200/70">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="text-center mb-10">
+        <span class="text-indigo-600 font-extrabold text-sm">خطوات بسيطة</span>
+        <h2 class="mt-2 text-3xl md:text-4xl font-black text-slate-900">كيف يعمل الموقع؟</h2>
+      </div>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-slate-50 rounded-2xl p-7 border border-slate-100 text-center hover:shadow-lg transition">
+          <span class="step-num mx-auto">1</span>
+          <h3 class="mt-4 font-black text-slate-800 text-lg">ارفع صورك</h3>
+          <p class="mt-1.5 text-sm text-slate-500 leading-relaxed font-semibold">اسحب الصور وأفلتها في المربع، أو انقر لاختيارها من جهازك.</p>
+        </div>
+        <div class="bg-slate-50 rounded-2xl p-7 border border-slate-100 text-center hover:shadow-lg transition">
+          <span class="step-num mx-auto">2</span>
+          <h3 class="mt-4 font-black text-slate-800 text-lg">رتّبها iis</h3>
+          <p class="mt-1.5 text-sm text-slate-500 leading-relaxed font-semibold">غيّر ترتيب الصور بالسحب أو بالأسهم، واحذف أي صورة لا تحتاجها.</p>
+        </div>
+        <div class="bg-slate-50 rounded-2xl p-7 border border-slate-100 text-center hover:shadow-lg transition">
+          <span class="step-num mx-auto">3</span>
+          <h3 class="mt-4 font-black text-slate-800 text-lg">حوّل وحمّل</h3>
+          <p class="mt-1.5 text-sm text-slate-500 leading-relaxed font-semibold">اضغط «تحويل إلى PDF» ثم اضغط «تحميل ملف PDF» فورًا.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== تواصل مع المطوّر ===== -->
+  <section id="contact" class="py-16">
+    <div class="max-w-5xl mx-auto px-4">
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-600 p-8 md:p-14 text-center text-white shadow-2xl shadow-indigo-500/30">
+        <span class="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-white/10"></span>
+        <span class="absolute -bottom-20 -left-16 w-64 h-64 rounded-full bg-white/10"></span>
+        <div class="relative">
+          <span class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/15 backdrop-blur mb-5">
+            <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          </span>
+          <h2 class="text-3xl md:text-4xl font-black">تواصل مع المطوّر</h2>
+          <p class="mt-3 text-indigo-100 font-semibold max-w-xl mx-auto">هل لديك استفسار أو اقتراح لتحسين الموقع؟ لا تتردد في التواصل معي مباشرة — يسعدني سماع رأيك.</p>
+          <a href="tel:+201224738170" dir="ltr" class="mt-6 inline-flex items-center gap-3 bg-white/15 hover:bg-white/25 border border-white/25 rounded-2xl px-6 py-3 transition">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <span class="text-xl md:text-2xl font-black tracking-widest">01224738170</span>
+          </a>
+          <div class="mt-6">
+            <a href="https://wa.me/201224738170" target="_blank" rel="noopener" class="btn-wa">
+              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.967-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              تواصل عبر واتساب
+            </a>
+          </div>
+          <p class="mt-4 text-xs text-indigo-200 font-semibold">متاح للرد يوميًا من 10 صباحًا حتى 10 مساءً بالتوقيت المصري</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== الفوتر ===== -->
+<footer class="bg-slate-900 text-slate-300 py-8">
+  <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3 text-center">
+    <div class="flex items-center gap-2">
+      <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </span>
+      <span class="font-extrabold text-white">Image to PDF</span>
+      <span class="text-xs text-slate-400 font-semibold">— تحويل الصور إلى PDF مجانًا</span>
+    </div>
+    <p class="text-xs text-slate-400 font-semibold">© 2025 جميع الحقوق محفوظة • صُنع بعناية ❤️</p>
+  </div>
+</footer>
+
+<!-- ===== زر واتساب العائم ===== -->
+<a href="https://wa.me/201224738170" target="_blank" rel="noopener" class="wa-float" title="تواصل عبر واتساب" aria-label="تواصل عبر واتساب">
+  <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.967-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<!-- ===== شاشة التحميل ===== -->
+<div id="overlay" class="hide fixed inset-0 z-50 bg-slate-900/65 backdrop-blur-sm">
+  <div class="w-full h-full flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl p-8 md:p-10 text-center max-w-sm w-full">
+      <div class="spinner mx-auto"></div>
+      <p id="overlayText" class="mt-5 font-black text-slate-800 text-lg">جارٍ إنشاء ملف PDF...</p>
+      <p class="mt-1 text-sm text-slate-500 font-semibold">قد يستغرق بضع ثوانٍ حسب عدد الصور وحجمها</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== التنبيهات ===== -->
+<div id="toasts" aria-live="polite" class="fixed top-4 inset-x-0 z-[60] flex flex-col items-center gap-2 pointer-events-none px-4"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+  var images = [];
+  var idCounter = 0;
+  var pdfBlob = null;
+  var pdfPages = 0;
+  var dragId = null;
+
+  var dropzone = document.getElementById('dropzone');
+  var fileInput = document.getElementById('fileInput');
+  var previewWrap = document.getElementById('previewWrap');
+  var previewGrid = document.getElementById('previewGrid');
+  var countText = document.getElementById('countText');
+  var clearBtn = document.getElementById('clearBtn');
+  var convertBtn = document.getElementById('convertBtn');
+  var resultPanel = document.getElementById('resultPanel');
+  var pdfSizeEl = document.getElementById('pdfSize');
+  var pdfPagesEl = document.getElementById('pdfPages');
+  var downloadBtn = document.getElementById('downloadBtn');
+  var newConvBtn = document.getElementById('newConvBtn');
+  var overlay = document.getElementById('overlay');
+  var overlayText = document.getElementById('overlayText');
+  var toastsBox = document.getElementById('toasts');
+
+  var ICON_TRASH = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
+  var ICON_CHEV_R = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+  var ICON_CHEV_L = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>';
+  var ICON_OK = '<svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  var ICON_ERR = '<svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+  var ICON_INFO = '<svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12.01" y2="16"/><line x1="12" y1="8" x2="12" y2="12"/></svg>';
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function formatSize(bytes) {
+    if (!bytes && bytes !== 0) return '';
+    if (bytes < 1024) return bytes + ' بايت';
+    var kb = bytes / 1024;
+    if (kb < 1024) return kb.toFixed(1) + ' كيلوبايت';
+    return (kb / 1024).toFixed(2) + ' ميجابايت';
+  }
+
+  function toast(msg, type) {
+    type = type || 'info';
+    var styles = { success: 'bg-emerald-600', error: 'bg-rose-600', info: 'bg-slate-800' };
+    var icons = { success: ICON_OK, error: ICON_ERR, info: ICON_INFO };
+    var el = document.createElement('div');
+    el.className = 'toast pointer-events-auto flex items-center gap-2 text-white text-sm font-bold px-5 py-3 rounded-xl shadow-xl ' + (styles[type] || styles.info);
+    el.innerHTML = (icons[type] || icons.info) + '<span>' + esc(msg) + '</span>';
+    toastsBox.appendChild(el);
+    setTimeout(function () {
+      el.style.transition = 'opacity .3s ease, transform .3s ease';
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(-10px)';
+      setTimeout(function () { el.remove(); }, 320);
+    }, 3400);
+  }
+
+  function shakeDropzone() {
+    dropzone.classList.remove('shake');
+    void dropzone.offsetWidth;
+    dropzone.classList.add('shake');
+  }
+
+  function showOverlay(show) {
+    overlay.classList.toggle('hide', !show);
+  }
+
+  function guessType(file) {
+    var n = (file.name || '').toLowerCase();
+    if (n.slice(-4) === '.png') return 'image/png';
+    if (n.slice(-5) === '.webp') return 'image/webp';
+    if (n.slice(-4) === '.jpg' || n.slice(-5) === '.jpeg') return 'image/jpeg';
+    return file.type || '';
+  }
+
+  function readBytes(file) {
+    if (file.arrayBuffer) return file.arrayBuffer();
+    return new Promise(function (resolve, reject) {
+      var r = new FileReader();
+      r.onload = function () { resolve(r.result); };
+      r.onerror = function () { reject(r.error); };
+      r.readAsArrayBuffer(file);
+    });
+  }
+
+  function imageToPngBytes(url) {
+    return new Promise(function (resolve, reject) {
+      var im = new Image();
+      im.onload = function () {
+        try {
+          var c = document.createElement('canvas');
+          c.width = im.naturalWidth;
+          c.height = im.naturalHeight;
+          c.getContext('2d').drawImage(im, 0, 0);
+          c.toBlob(function (b) {
+            if (b) { b.arrayBuffer().then(resolve, reject); } else { reject(new Error('toBlob failed')); }
+          }, 'image/png');
+        } catch (e) { reject(e); }
+      };
+      im.onerror = function () { reject(new Error('image load failed')); };
+      im.src = url;
+    });
+  }
+
+  /* قراءة اتجاه EXIF لصnegie JPEG so that phone photos keep their rotation */
+  function getJpegOrientation(buffer) {
+    try {
+      var view = new DataView(buffer);
+      if (view.byteLength < 4 || view.getUint16(0, false) !== 0xFFD8) return 1;
+      var offset = 2;
+      while (offset + 4 < view.byteLength) {
+        if (view.getUint8(offset) !== 0xFF) break;
+        var marker = view.getUint8(offset + 1);
+        var size = view.getUint16(offset + 2, false);
+        if (marker === 0xE1 && size >= 8) {
+          if (view.getUint32(offset + 4, false) === 0x45786966) {
+            return readTiffOrientation(view, offset + 8);
+          }
+        }
+        if (marker === 0xDA || marker === 0xD9) break;
+        offset += 2 + size;
+      }
+    } catch (e) {}
+    return 1;
+  }
+
+  function readTiffOrientation(view, tiffStart) {
+    try {
+      var little = view.getUint16(tiffStart, false) === 0x4949;
+      var u16 = function (o) { return little ? view.getUint16(o, true) : view.getUint16(o, false); };
+      var u32 = function (o) { return little ? view.getUint32(o, true) : view.getUint32(o, false); };
+      if (u16(tiffStart + 2) !== 0x002A) return 1;
+      var ifd = tiffStart + u32(tiffStart + 4);
+      var count = u16(ifd);
+      for (var i = 0; i < count; i++) {
+        var entry = ifd + 2 + i * 12;
+        if (u16(entry) === 0x0112) {
+          var val = u16(entry + 8);
+          return (val >= 1 && val <= 8) ? val : 1;
+        }
+      }
+    } catch (e) {}
+    return 1;
+  }
+
+  function handleFiles(fileList) {
+    if (!fileList || !fileList.length) return;
+    var files = Array.prototype.slice.call(fileList);
+    var rejected = [];
+    var added = 0;
+    files.forEach(function (f) {
+      var type = (f.type || guessType(f) || '').toLowerCase();
+      var name = f.name || 'ملف';
+      if (ALLOWED_TYPES.indexOf(type) === -1) { rejected.push(name); return; }
+      images.push({
+        id: ++idCounter,
+        file: f,
+        url: URL.createObjectURL(f),
+        name: name,
+        size: f.size,
+        type: type
+      });
+      added++;
+    });
+    fileInput.value = '';
+    if (added) {
+      render();
+      toast('تمت إضافة ' + added + (added === 1 ? ' صورة' : ' صور'), 'success');
+    }
+    if (rejected.length) {
+      shakeDropzone();
+      toast('صيغة غير مدعومة: ' + rejected.join('، ') + ' — الصيغ المدعومة: JPG, PNG, WEBP', 'error');
+    }
+  }
+
+  function render() {
+    var has = images.length > 0;
+    countText.textContent = 'عدد الصور: ' + images.length;
+    previewWrap.classList.toggle('hide', !has);
+    clearBtn.classList.toggle('hide', !has);
+    convertBtn.classList.toggle('is-disabled', !has);
+    convertBtn.setAttribute('aria-disabled', String(!has));
+    hideResult();
+
+    previewGrid.innerHTML = '';
+    images.forEach(function (img, i) {
+      var el = document.createElement('div');
+      el.className = 'thumb group relative bg-white rounded-xl border-2 border-slate-200 overflow-hidden shadow-sm hover:shadow-lg hover:border-indigo-300 transition cursor-grab';
+      el.draggable = true;
+      el.dataset.id = img.id;
+      el.innerHTML =
+        '<div class="relative aspect-square bg-slate-100">' +
+          '<img src="' + img.url + '" alt="' + esc(img.name) + '" draggable="false" loading="lazy" class="w-full h-full object-cover pointer-events-none select-none">' +
+          '<span class="absolute top-2 right-2 w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-extrabold flex items-center justify-center shadow-md">' + (i + 1) + '</span>' +
+          '<button type="button" data-action="delete" title="حذف الصورة" aria-label="حذف الصورة" class="absolute top-2 left-2 w-7 h-7 rounded-full bg-white text-rose-500 shadow-md flex items-center justify-center hover:bg-rose-500 hover:text-white transition cursor-pointer">' + ICON_TRASH + '</button>' +
+        '</div>' +
+        '<div class="p-2">' +
+          '<p class="text-xs font-bold text-slate-700 truncate" title="' + esc(img.name) + '">' + esc(img.name) + '</p>' +
+          '<div class="flex items-center justify-between mt-1.5">' +
+            '<span class="text-[10px] font-semibold text-slate-400">' + formatSize(img.size) + '</span>' +
+            '<div class="flex items-center gap-1">' +
+              '<button type="button" data-action="move" data-dir="-1" title="تقديم" aria-label="تقديم الصورة" class="move-btn">' + ICON_CHEV_R + '</button>' +
+              '<button type="button" data-action="move" data-dir="1" title="تأخير" aria-label="تأخير الصورة" class="move-btn">' + ICON_CHEV_L + '</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      previewGrid.appendChild(el);
+    });
+  }
+
+  function moveItem(idx, dir) {
+    var target = idx + dir;
+    if (target < 0 || target >= images.length) return;
+    var moved = images.splice(idx, 1)[0];
+    images.splice(target, 0, moved);
+    render();
+  }
+
+  function hideResult() { resultPanel.classList.add('hide'); }
+
+  function showResult() {
+    pdfSizeEl.textContent = formatSize(pdfBlob.size);
+    pdfPagesEl.textContent = pdfPages;
+    resultPanel.classList.remove('hide');
+  }
+
+  function resetAll() {
+    images.forEach(function (img) { URL.revokeObjectURL(img.url); });
+    images.length = 0;
+    pdfBlob = null;
+    pdfPages = 0;
+    fileInput.value = '';
+    render();
+    toast('تم مسح جميع الصور، يمكنك البدء من جديد', 'info');
+  }
+
+  /* ===== أحداث منطقة الرفع ===== */
+  dropzone.addEventListener('click', function () { fileInput.click(); });
+  dropzone.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+  });
+  fileInput.addEventListener('change', function () { handleFiles(fileInput.files); });
+
+  ['dragenter', 'dragover'].forEach(function (ev) {
+    dropzone.addEventListener(ev, function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.add('dragover');
+    });
+  });
+  ['dragleave', 'drop'].forEach(function (ev) {
+    dropzone.addEventListener(ev, function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove('dragover');
+    });
+  });
+  dropzone.addEventListener('drop', function (e) {
+    handleFiles(e.dataTransfer ? e.dataTransfer.files : null);
+  });
+  window.addEventListener('dragover', function (e) { e.preventDefault(); });
+  window.addEventListener('drop', function (e) { e.preventDefault(); });
+
+  /* ===== أحداث المعاينة ===== */
+  previewGrid.addEventListener('click', function (e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    var thumb = e.target.closest('.thumb');
+    if (!thumb) return;
+    var id = Number(thumb.dataset.id);
+    var idx = images.findIndex(function (x) { return x.id === id; });
+    if (idx === -1) return;
+    if (btn.dataset.action === 'delete') {
+      URL.revokeObjectURL(images[idx].url);
+      images.splice(idx, 1);
+      render();
+      toast('تم حذف الصورة', 'info');
+    } else if (btn.dataset.action === 'move') {
+      moveItem(idx, Number(btn.dataset.dir));
+    }
+  });
+
+  previewGrid.addEventListener('dragstart', function (e) {
+    var t = e.target.closest('.thumb');
+    if (!t) return;
+    dragId = Number(t.dataset.id);
+    t.classList.add('dragging');
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', String(dragId)); } catch (err) {}
+    }
+  });
+  previewGrid.addEventListener('dragover', function (e) {
+    var t = e.target.closest('.thumb');
+    if (!t) return;
+    e.preventDefault();
+    previewGrid.querySelectorAll('.thumb.drag-target').forEach(function (x) { x.classList.remove('drag-target'); });
+    t.classList.add('drag-target');
+  });
+  previewGrid.addEventListener('dragleave', function (e) {
+    if (!previewGrid.contains(e.relatedTarget)) {
+      previewGrid.querySelectorAll('.thumb.drag-target').forEach(function (x) { x.classList.remove('drag-target'); });
+    }
+  });
+  previewGrid.addEventListener('drop', function (e) {
+    e.preventDefault();
+    var t = e.target.closest('.thumb');
+    previewGrid.querySelectorAll('.thumb.drag-target').forEach(function (x) { x.classList.remove('drag-target'); });
+    if (!t || dragId === null) return;
+    var from = images.findIndex(function (x) { return x.id === dragId; });
+    var to = images.findIndex(function (x) { return x.id === Number(t.dataset.id); });
+    if (from !== -1 && to !== -1 && from !== to) {
+      var moved = images.splice(from, 1)[0];
+      images.splice(to, 0, moved);
+      render();
+    }
+  });
+  previewGrid.addEventListener('dragend', function (e) {
+    var t = e.target.closest('.thumb');
+    if (t) t.classList.remove('dragging');
+    previewGrid.querySelectorAll('.thumb.drag-target').forEach(function (x) { x.classList.remove('drag-target'); });
+    dragId = null;
+  });
+
+  /* ===== التحويل إلى PDF ===== */
+  convertBtn.addEventListener('click', function () {
+    if (!images.length) {
+      toast('الرجاء اختيار صورة واحدة على الأقل قبل التحويل', 'error');
+      shakeDropzone();
+      dropzone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (typeof PDFLib === 'undefined' || !PDFLib.PDFDocument) {
+      toast('تعذر تحميل مكتبة إنشاء PDF، تحقق من اتصالك بالإنترنت وأعد المحاولة', 'error');
+      return;
+    }
+
+    showOverlay(true);
+    overlayText.textContent = 'جارٍ إنشاء ملف PDF...';
+
+    (async function () {
+      try {
+        var doc = await PDFLib.PDFDocument.create();
+        doc.setTitle('Images PDF');
+        doc.setProducer('Image to PDF');
+        doc.setCreator('Image to PDF');
+
+        pdfPages = images.length;
+
+        for (var i = 0; i < images.length; i++) {
+          overlayText.textContent = 'جارٍ معالجة الصورة ' + (i + 1) + ' من ' + images.length + '...';
+          var img = images[i];
+          var bytes = await readBytes(img.file);
+          var embedded = null;
+
+          if (img.type === 'image/png') {
+            embedded = await doc.embedPng(bytes);
+          } else if (img.type === 'image/jpeg') {
+            if (getJpegOrientation(bytes) !== 1) {
+              embedded = await doc.embedPng(await imageToPngBytes(img.url));
+            } else {
+              try {
+                embedded = await doc.embedJpg(bytes);
+              } catch (err) {
+                embedded = await doc.embedPng(await imageToPngBytes(img.url));
+              }
+            }
+          } else {
+            /* WEBP */
+            embedded = await doc.embedPng(await imageToPngBytes(img.url));
+          }
+
+          var page = doc.addPage([embedded.width, embedded.height]);
+          page.drawImage(embedded, { x: 0, y: 0, width: embedded.width, height: embedded.height });
+        }
+
+        var out = await doc.save();
+        pdfBlob = new Blob([out], { type: 'application/pdf' });
+
+        showOverlay(false);
+        showResult();
+        resultPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        toast('تم إنشاء ملف PDF بنجاح', 'success');
+      } catch (err) {
+        console.error(err);
+        showOverlay(false);
+        toast('حدث خطأ أثناء التحويل، الرجاء المحاولة مرة أخرى', 'error');
+      }
+    })();
+  });
+
+  downloadBtn.addEventListener('click', function () {
+    if (!pdfBlob) return;
+    var url = URL.createObjectURL(pdfBlob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'images.pdf';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+    toast('جارٍ تحميل ملف PDF', 'success');
+  });
+
+  clearBtn.addEventListener('click', resetAll);
+  newConvBtn.addEventListener('click', resetAll);
+
+  render();
+})();
+</script>
+</body>
+</html>
